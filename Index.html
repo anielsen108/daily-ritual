@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Ritual</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b0d0f;
+      --panel: #12161a;
+      --panel-2: #181e24;
+      --text: #edf4f1;
+      --muted: #8fa19a;
+      --empty: #232a30;
+      --empty-top: #303940;
+      --lit: #37e06f;
+      --lit-top: #9cffb4;
+      --line: rgba(255, 255, 255, 0.08);
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      background:
+        radial-gradient(circle at top left, rgba(55, 224, 111, 0.11), transparent 34rem),
+        linear-gradient(145deg, #080a0c 0%, var(--bg) 48%, #101418 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+    }
+
+    main {
+      width: min(1120px, 100%);
+      min-height: min(720px, calc(100vh - 56px));
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 24px;
+    }
+
+    header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4.5rem);
+      line-height: 0.9;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .reset {
+      appearance: none;
+      border: 1px solid rgba(55, 224, 111, 0.42);
+      background: linear-gradient(180deg, #23342a, #111813);
+      color: var(--text);
+      min-width: 88px;
+      height: 48px;
+      padding: 0 18px;
+      border-radius: 6px;
+      font: inherit;
+      font-weight: 750;
+      box-shadow: 0 16px 36px var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      cursor: pointer;
+    }
+
+    .reset:hover {
+      border-color: rgba(156, 255, 180, 0.72);
+    }
+
+    .meters {
+      align-self: stretch;
+      display: grid;
+      grid-template-columns: repeat(9, minmax(68px, 1fr));
+      align-items: end;
+      gap: clamp(12px, 2vw, 28px);
+    }
+
+    .meter {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      align-items: end;
+      gap: 14px;
+    }
+
+    .stack {
+      min-height: 360px;
+      display: flex;
+      flex-direction: column-reverse;
+      justify-content: end;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015));
+      box-shadow: inset 0 1px 18px rgba(255, 255, 255, 0.025);
+    }
+
+    .box {
+      width: 100%;
+      aspect-ratio: 2.7 / 1;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      background:
+        linear-gradient(180deg, var(--empty-top), var(--empty)),
+        var(--empty);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        inset 0 -10px 16px rgba(0, 0, 0, 0.22),
+        0 6px 14px rgba(0, 0, 0, 0.22);
+      cursor: pointer;
+      transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+    }
+
+    .box:hover,
+    .box:focus-visible {
+      transform: translateY(-1px);
+      border-color: rgba(156, 255, 180, 0.42);
+      outline: none;
+    }
+
+    .box.filled {
+      border-color: rgba(156, 255, 180, 0.58);
+      background:
+        linear-gradient(180deg, var(--lit-top), var(--lit) 45%, #168a3e),
+        var(--lit);
+      box-shadow:
+        0 0 18px rgba(55, 224, 111, 0.42),
+        0 0 38px rgba(55, 224, 111, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.58),
+        inset 0 -12px 18px rgba(0, 0, 0, 0.24);
+    }
+
+    .meter.complete .box.filled {
+      border-color: rgba(116, 173, 126, 0.44);
+      background:
+        linear-gradient(180deg, #87ad8f, #4f8f5d 45%, #2d6538),
+        #4f8f5d;
+      box-shadow:
+        0 0 10px rgba(79, 143, 93, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -12px 18px rgba(0, 0, 0, 0.32);
+    }
+
+    .meter.complete .label {
+      border-color: rgba(116, 173, 126, 0.32);
+      background: linear-gradient(180deg, #1d2a21, #141c17);
+      color: #b8d0bd;
+    }
+
+    .meter.complete .count {
+      color: #7fa789;
+    }
+
+    .meter.active .stack {
+      border-color: rgba(156, 255, 180, 0.52);
+      box-shadow:
+        0 0 0 2px rgba(55, 224, 111, 0.2),
+        inset 0 1px 18px rgba(255, 255, 255, 0.025);
+    }
+
+    .meter.active .label {
+      border-color: rgba(156, 255, 180, 0.46);
+    }
+
+    .label {
+      min-height: 72px;
+      display: grid;
+      gap: 8px;
+      padding: 12px 10px;
+      border-radius: 8px;
+      background: linear-gradient(180deg, var(--panel-2), var(--panel));
+      border: 1px solid var(--line);
+    }
+
+    .name {
+      overflow-wrap: anywhere;
+      font-size: clamp(0.78rem, 1.1vw, 0.96rem);
+      font-weight: 760;
+      line-height: 1.05;
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    footer {
+      color: var(--muted);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+    }
+
+    @media (max-width: 860px) {
+      body {
+        padding: 18px;
+      }
+
+      main {
+        min-height: calc(100vh - 36px);
+      }
+
+      header {
+        align-items: start;
+        flex-direction: column;
+      }
+
+      .meters {
+        grid-template-columns: repeat(4, minmax(72px, 1fr));
+      }
+
+      .stack {
+        min-height: 260px;
+        padding: 8px;
+        gap: 6px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .meters {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .stack {
+        min-height: 220px;
+      }
+
+      footer {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Daily Ritual</h1>
+
+      </div>
+      <button class="reset" type="button" data-reset>A New Day</button>
+    </header>
+
+    <section class="meters" aria-label="Daily meter boxes" data-meters></section>
+
+    <footer>
+      <span data-progress>0/22 + 2 slack</span>
+    </footer>
+  </main>
+
+  <script>
+    const items = [
+      { name: "Sleep", boxes: 8, groupedFirst: 7 },
+      { name: "Wake Up", boxes: 1 },
+      { name: "Warm-Up", boxes: 1 },
+      { name: "Contribute", boxes: 3 },
+      { name: "Move", boxes: 3 },
+      { name: "Socialize", boxes: 3 },
+      { name: "Incident", boxes: 1 },
+      { name: "Enjoy", boxes: 1 },
+      { name: "Wind-Down", boxes: 1 }
+    ];
+
+    const meters = document.querySelector("[data-meters]");
+    const reset = document.querySelector("[data-reset]");
+    const progress = document.querySelector("[data-progress]");
+    let activeMeterIndex = 0;
+
+    function renderMeters() {
+      items.forEach((item) => {
+        const meter = document.createElement("article");
+        meter.className = "meter";
+        meter.setAttribute("aria-current", "false");
+
+        const stack = document.createElement("div");
+        stack.className = "stack";
+        stack.setAttribute("aria-label", `${item.name} meter`);
+
+        for (let boxIndex = 1; boxIndex <= item.boxes; boxIndex += 1) {
+          const box = document.createElement("button");
+          box.type = "button";
+          box.className = "box";
+          box.dataset.item = item.name;
+          box.dataset.group = item.groupedFirst && boxIndex <= item.groupedFirst
+            ? `${item.name}-grouped-first-${item.groupedFirst}`
+            : `${item.name}-box-${boxIndex}`;
+          box.setAttribute("aria-label", `${item.name} box ${boxIndex} of ${item.boxes}`);
+          stack.appendChild(box);
+        }
+
+        const label = document.createElement("div");
+        label.className = "label";
+        label.innerHTML = `
+          <span class="name">${item.name}</span>
+          <span class="count">0 / ${item.boxes}</span>
+        `;
+
+        meter.append(stack, label);
+        meters.appendChild(meter);
+      });
+    }
+
+    function getMeters() {
+      return Array.from(document.querySelectorAll(".meter"));
+    }
+
+    function getBoxes() {
+      return Array.from(document.querySelectorAll(".box"));
+    }
+
+    function getMeterBoxes(meter) {
+      return Array.from(meter.querySelectorAll(".box"));
+    }
+
+    function getGroupBoxes(group) {
+      return getBoxes().filter((box) => box.dataset.group === group);
+    }
+
+    function setBoxGroupState(box, shouldFill) {
+      getGroupBoxes(box.dataset.group).forEach((groupBox) => {
+        groupBox.classList.toggle("filled", shouldFill);
+      });
+    }
+
+    function setActiveMeter(index) {
+      const meterElements = getMeters();
+      if (!meterElements.length) return;
+
+      activeMeterIndex = (index + meterElements.length) % meterElements.length;
+      meterElements.forEach((meter, meterIndex) => {
+        const isActive = meterIndex === activeMeterIndex;
+        meter.classList.toggle("active", isActive);
+        meter.setAttribute("aria-current", isActive ? "true" : "false");
+      });
+    }
+
+    function changeMeterActiveBoxes(meter, direction) {
+      const meterBoxes = getMeterBoxes(meter);
+      const candidate = direction > 0
+        ? meterBoxes.find((box) => !box.classList.contains("filled"))
+        : meterBoxes.findLast((box) => box.classList.contains("filled"));
+
+      if (!candidate) return;
+
+      setBoxGroupState(candidate, direction > 0);
+      updateCounts();
+    }
+
+    function updateCounts() {
+      const boxes = getBoxes();
+      const filled = boxes.filter((box) => box.classList.contains("filled")).length;
+      const slack = 24 - boxes.length;
+      progress.textContent = `${filled}/${boxes.length} + ${slack} slack`;
+
+      document.querySelectorAll(".meter").forEach((meter) => {
+        const meterBoxes = getMeterBoxes(meter);
+        const meterFilled = meterBoxes.filter((box) => box.classList.contains("filled")).length;
+        meter.classList.toggle("complete", meterFilled === meterBoxes.length);
+        meter.querySelector(".count").textContent = `${meterFilled} / ${meterBoxes.length}`;
+      });
+    }
+
+    meters.addEventListener("click", (event) => {
+      const clicked = event.target.closest(".box");
+      if (!clicked) return;
+
+      const clickedMeter = clicked.closest(".meter");
+      setActiveMeter(getMeters().indexOf(clickedMeter));
+
+      const groupBoxes = getGroupBoxes(clicked.dataset.group);
+      const shouldFill = !groupBoxes.every((box) => box.classList.contains("filled"));
+      setBoxGroupState(clicked, shouldFill);
+      updateCounts();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.altKey || event.ctrlKey || event.metaKey) return;
+
+      const meterElements = getMeters();
+      if (!meterElements.length) return;
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault();
+        setActiveMeter(activeMeterIndex - 1);
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault();
+        setActiveMeter(activeMeterIndex + 1);
+      } else if (event.key === " " || event.key === "Spacebar" || event.key === "ArrowUp") {
+        event.preventDefault();
+        changeMeterActiveBoxes(meterElements[activeMeterIndex], 1);
+      } else if (event.key === "ArrowDown") {
+        event.preventDefault();
+        changeMeterActiveBoxes(meterElements[activeMeterIndex], -1);
+      }
+    });
+
+    reset.addEventListener("click", () => {
+      document.querySelectorAll(".box.filled").forEach((box) => box.classList.remove("filled"));
+      updateCounts();
+    });
+
+    renderMeters();
+    setActiveMeter(0);
+    updateCounts();
+  </script>
+</body>
+</html>
